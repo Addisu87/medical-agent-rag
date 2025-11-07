@@ -32,7 +32,7 @@ async def entrypoint(ctx: JobContext):
     
     session = AgentSession(
         stt=inference.STT(model="assemblyai/universal-streaming", language="en"),
-        llm=inference.LLM(model="openai/gpt-4"),
+        llm=inference.LLM(model="deepseek-chat"),
         tts=inference.TTS(model="cartesia/sonic-3"),
         vad=ctx.proc.userdata["vad"],
         turn_detection=MultilingualModel(),

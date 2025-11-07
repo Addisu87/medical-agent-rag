@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from app.core.logging import setup_logfire
 from app.api.routes import router as api_router
 from app.db.session import init_db
+import uvicorn
 
 
 # Configure logging
@@ -47,6 +48,4 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
