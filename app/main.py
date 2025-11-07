@@ -10,20 +10,22 @@ from app.db.session import init_db
 # Configure logging
 setup_logfire()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    logfire.info('Application starting up')
+    logfire.info("Application starting up")
     init_db()
     yield
     # Shutdown
-    logfire.info('Application shutting down')
-    
+    logfire.info("Application shutting down")
+
+
 app = FastAPI(
     title="Medical Transcription AI",
     description="AI-powered medical conversation transcription and summarization",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Include API routes
@@ -31,18 +33,20 @@ app.include_router(api_router, prefix="/api/v1")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     allow_credentials=True,
 )
 
 
 @app.get("/health")
 async def health_check():
-    logfire.info('Health check called')
+    logfire.info("Health check called")
     return {"status": "healthy"}
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

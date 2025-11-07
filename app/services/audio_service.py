@@ -1,4 +1,4 @@
-import logging
+import logfire
 from livekit.agents import (
     Agent,
     AgentSession,
@@ -11,10 +11,9 @@ from livekit.agents import (
 )
 from livekit.plugins import silero, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
-from app.agents.medical_summarizer import MedicalSummarizer
-from app.agents.medical_transcriber import MedicalTranscriber
-
-logger = logging.getLogger("medical-transcriber")
+from app.agents.medical_summarizer import generate_medical_notes
+from app.db.session import SessionLocal
+from app.services.database_service import create_transcription
 
 class MedicalTranscriptionAgent(Agent):
     def __init__(self):
@@ -24,21 +23,13 @@ class MedicalTranscriptionAgent(Agent):
             and real-time summarization of medical conversations.
             """
         )
-
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
-    proc.userdata["summarizer"] = MedicalSummarizer()
-    proc.userdata["transcriber"] = MedicalTranscriber()
+    logfire.info("VAD model loaded")
 
 async def entrypoint(ctx: JobContext):
     ctx.log_context_fields = {"room": ctx.room.name}
     
-    # Initialize services
-    summarizer = ctx.proc.userdata["summarizer"]
-    transcriber = ctx.proc.userdata["transcriber"]
-    db_service = ctx.proc.userdata["db_service"]
-    
-    # Create session
     session = AgentSession(
         stt=inference.STT(model="assemblyai/universal-streaming", language="en"),
         llm=inference.LLM(model="openai/gpt-4"),
@@ -55,35 +46,42 @@ async def entrypoint(ctx: JobContext):
     def _on_metrics_collected(ev):
         metrics.log_metrics(ev.metrics)
         usage_collector.collect(ev.metrics)
-    
+
     # Handle transcriptions
     @session.on("transcription_final")
     async def handle_transcription(event):
-        transcript = event.result.text
-        if not transcript:
+        if not event.result.text:
             return
         
-        logger.info(f"Transcription received: {transcript}")
+        with logfire.span("handle_transcription"):
+            transcript = event.result.text
+            medical_notes = await generate_medical_notes(transcript)
         
-        # Generate medical notes
-        medical_notes = await summarizer.generate_medical_notes(transcript)
-        
-        # Store in database
-        await db_service.save_transcription(
-            transcript_text=transcript,
-            medical_notes=medical_notes,
-            room_name=ctx.room.name
-        )
-        
-        logger.info(f"Medical notes generated and stored: {medical_notes}")
+            # Save to database
+            db = SessionLocal()
+            try:
+                await create_transcription(
+                    db,
+                    patient_id="livekit-patient",
+                    doctor_id="livekit-doctor",
+                    raw_text=transcript,
+                    medical_notes=medical_notes,
+                    room_name=ctx.room.name
+                )
+                logfire.info("Medical transcription saved to records")
+            except Exception as e:
+                logfire.error("Failed to save transcription", error=str(e))
+            finally:
+                db.close()
+            
+            # Speak summary to user
+            summary = medical_notes.get('summary', 'Key medical points noted.')
+            await session.say(f"Medical summary: {summary}")
     
-    # Start session
     await session.start(
         agent=MedicalTranscriptionAgent(),
         room=ctx.room,
-        room_input_options={
-            "noise_cancellation": noise_cancellation.BVC()
-        }
+        room_input_options={"noise_cancellation": noise_cancellation.BVC()}
     )
 
 def run_agent():

@@ -6,9 +6,7 @@ from app.core.config import settings
 def create_llm_model():
     return OpenAIChatModel(
         settings.DEEPSEEK_MODEL,
-        provider=DeepSeekProvider(
-            api_key=settings.DEEPSEEK_API_KEY
-        )
+        provider=DeepSeekProvider(api_key=settings.DEEPSEEK_API_KEY),
     )
 
 

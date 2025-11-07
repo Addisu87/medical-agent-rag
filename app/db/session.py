@@ -10,12 +10,13 @@ engine = create_engine(
     settings.DATABASE_URL,
     pool_size=20,
     max_overflow=0,
-    echo=False,  # Set to True for SQL query logging
-    pool_pre_ping=True  # Check connection health
+    echo=True,  # Set to True for SQL query logging
+    pool_pre_ping=True,  # Check connection health
 )
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 # Dependency for FastAPI
 def get_db():
@@ -25,15 +26,17 @@ def get_db():
     finally:
         db.close()
 
+
 # Database health check
 def check_db_health():
     try:
         with engine.connect() as conn:
-             conn.execute(select(1))
+            conn.execute(select(1))
         return True
     except Exception as e:
         logfire.error(f"Database health check failed: {e}")
         return False
+
 
 # Initialize database
 def init_db():

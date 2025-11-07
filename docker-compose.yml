@@ -3,9 +3,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: medical_user
-      POSTGRES_PASSWORD: medical_pass
-      POSTGRES_DB: medical_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: medical87
+      POSTGRES_DB: medicaldb
     ports:
       - "5432:5432"
     volumes:
@@ -15,12 +15,11 @@ services:
     depends_on:
       - db
     environment:
-      POSTGRES_USER: medical_user
-      POSTGRES_PASSWORD: medical_pass
-      POSTGRES_DB: medical_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: medical87
+      POSTGRES_DB: medicaldb
       POSTGRES_HOST=db
       POSTGRES_PORT=5432
-      ELEVENLABS_API_KEY=your_elevenlabs_api_key
     ports:
       - "8000:8000"
 volumes:

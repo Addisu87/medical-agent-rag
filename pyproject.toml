@@ -7,6 +7,7 @@ requires-python = ">=3.13.0"
 dependencies = [
     "assemblyai>=0.46.0",
     "fastapi>=0.121.0",
+    "livekit-agents[audio,core]",
     "livekit-api>=1.0.7",
     "livekit-plugins-noise-cancellation>=0.2.5",
     "llama-index>=0.14.7",
