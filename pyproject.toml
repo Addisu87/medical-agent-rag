@@ -9,7 +9,6 @@ dependencies = [
     "fastapi>=0.121.0",
     "livekit-agents",
     "livekit-api>=1.0.7",
-    "livekit-plugins-noise-cancellation>=0.2.5",
     "llama-index>=0.14.7",
     "logfire>=4.14.2",
     "psycopg2-binary>=2.9.11",

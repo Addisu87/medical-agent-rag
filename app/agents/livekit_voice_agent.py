@@ -11,7 +11,7 @@ from livekit.agents import (
     RoomInputOptions
 )
 from livekit.plugins import noise_cancellation, silero
-from livekit.plugins.turn_detector.multilingual import MultilingualModel
+from livekit.agents.llm import ChatContext
 from app.agents.medical_summarizer import generate_medical_notes
 from app.db.session import SessionLocal
 from app.services.database_service import create_transcription
@@ -24,6 +24,8 @@ class MedicalTranscriptionAgent(Agent):
             and real-time summarization of medical conversations.
             """
         )
+        self.chat_ctx = ChatContext()
+        
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
     logfire.info("VAD model loaded")
@@ -36,7 +38,6 @@ async def entrypoint(ctx: JobContext):
         llm=inference.LLM(model="deepseek-chat"),
         tts=inference.TTS(model="cartesia/sonic-3"),
         vad=ctx.proc.userdata["vad"],
-        turn_detection=MultilingualModel(),
         preemptive_generation=True
     )
     
