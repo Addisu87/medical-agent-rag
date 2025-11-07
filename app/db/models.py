@@ -1,9 +1,9 @@
-from sqlalchemy import Column, String, Text, DateTime, JSON, Boolean, Float, Enum, ForeignKey
+from sqlalchemy import Column, String, Text, DateTime, JSON, Boolean, Float, Enum, ForeignKey, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import enum
 
 Base = declarative_base()
@@ -36,8 +36,8 @@ class Patient(Base):
     phone = Column(String(20))
     email = Column(String(100))
     medical_record_number = Column(String(50), unique=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     
     # Relationships
     transcriptions = relationship("Transcription", back_populates="patient")
@@ -70,7 +70,7 @@ class Appointment(Base):
     duration_minutes = Column(Integer, default=30)
     status = Column(String(20), default="scheduled")  # scheduled, completed, cancelled
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     
     # Relationships
     patient = relationship("Patient", back_populates="appointments")
@@ -107,8 +107,8 @@ class Transcription(Base):
     
     # Timestamps
     processed_at = Column(DateTime)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     
     # Relationships
     patient = relationship("Patient", back_populates="transcriptions")
@@ -128,7 +128,7 @@ class TerminologyValidation(Base):
     category = Column(String(50))  # medication, condition, procedure, etc.
     suggested_correction = Column(String(200))
     is_corrected = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     
     # Relationships
     transcription = relationship("Transcription", back_populates="terminology_validations")
@@ -153,8 +153,8 @@ class MedicalSummary(Base):
     summary_quality_score = Column(Float)
     completeness_score = Column(Float)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     
     # Relationships
     transcription = relationship("Transcription")
@@ -163,7 +163,7 @@ class SystemMetrics(Base):
     __tablename__ = "system_metrics"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now(timezone.utc))
     metric_type = Column(String(50), nullable=False)  # transcription_accuracy, processing_time, etc.
     value = Column(Float, nullable=False)
     details = Column(JSON)

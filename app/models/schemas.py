@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Dict
 from datetime import datetime
 from enum import Enum
 
@@ -17,21 +17,21 @@ class MedicalNoteType(str, Enum):
 class TranscriptionBase(BaseModel):
     patient_id: str
     doctor_id: str
-    appointment_id: Optional[str]
-    audio_duration: Optional[float]
+    appointment_id: str | None = None
+    audio_duration: float | None = None
     language: str = "en"
 
 class TranscriptionCreate(TranscriptionBase):
-    audio_file_path: Optional[str]
-    live_session_id: Optional[str]
+    audio_file_path: str | None = None
+    live_session_id: str | None = None
 
 class TranscriptionResponse(TranscriptionBase):
     id: str
     status: TranscriptionStatus
-    raw_text: Optional[str]
-    medical_notes: Optional[Dict[str, Any]]
-    confidence_score: Optional[float]
-    processed_at: Optional[datetime]
+    raw_text: str | None = None
+    medical_notes: str | None = None
+    confidence_score: float | None = None
+    processed_at: datetime
     created_at: datetime
 
 class MedicalNote(BaseModel):
@@ -41,7 +41,7 @@ class MedicalNote(BaseModel):
     procedures: List[str]
     recommendations: List[str]
     follow_up_required: bool
-    follow_up_date: Optional[str]
+    follow_up_date: str | None = None
     urgency_level: str  # low, medium, high, emergency
     summary: str
 
@@ -49,5 +49,5 @@ class TerminologyValidation(BaseModel):
     term: str
     is_medical: bool
     confidence: float
-    suggested_correction: Optional[str]
-    category: Optional[str]
+    suggested_correction: str | None = None
+    category: str | None = None

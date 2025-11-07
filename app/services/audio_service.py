@@ -13,7 +13,6 @@ from livekit.plugins import silero, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from app.agents.medical_summarizer import MedicalSummarizer
 from app.agents.medical_transcriber import MedicalTranscriber
-from app.services.database_service import DatabaseService
 
 logger = logging.getLogger("medical-transcriber")
 
@@ -30,7 +29,6 @@ def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
     proc.userdata["summarizer"] = MedicalSummarizer()
     proc.userdata["transcriber"] = MedicalTranscriber()
-    proc.userdata["db_service"] = DatabaseService()
 
 async def entrypoint(ctx: JobContext):
     ctx.log_context_fields = {"room": ctx.room.name}

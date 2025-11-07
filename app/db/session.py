@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 import logfire
@@ -29,7 +29,7 @@ def get_db():
 def check_db_health():
     try:
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+             conn.execute(select(1))
         return True
     except Exception as e:
         logfire.error(f"Database health check failed: {e}")

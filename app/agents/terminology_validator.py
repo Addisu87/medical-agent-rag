@@ -1,7 +1,8 @@
 from pydantic_ai import Agent
 from app.core.llm import llm_model
 from app.models.schemas import TerminologyValidation
-from typing import List, Optional
+from typing import List
+import logfire
 
 class TerminologyValidator:
     def __init__(self):
@@ -21,11 +22,12 @@ class TerminologyValidator:
         )
     
     async def validate_terms(self, terms: List[str]) -> List[TerminologyValidation]:
-        results = []
-        for term in terms:
-            validation = await self._validate_single_term(term)
-            results.append(validation)
-        return results
+        with logfire.span("validate_terms"):
+            results = []
+            for term in terms:
+                validation = await self._validate_single_term(term)
+                results.append(validation)
+            return results
     
     async def _validate_single_term(self, term: str) -> TerminologyValidation:
         result = await self.agent.run(f"Validate this medical term: {term}")
