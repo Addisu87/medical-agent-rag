@@ -8,8 +8,9 @@ from livekit.agents import (
     cli,
     inference,
     metrics,
+    RoomInputOptions
 )
-from livekit.plugins import silero, noise_cancellation
+from livekit.plugins import noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from app.agents.medical_summarizer import generate_medical_notes
 from app.db.session import SessionLocal
@@ -81,7 +82,13 @@ async def entrypoint(ctx: JobContext):
     await session.start(
         agent=MedicalTranscriptionAgent(),
         room=ctx.room,
-        room_input_options={"noise_cancellation": noise_cancellation.BVC()}
+        room_input_options=RoomInputOptions(
+            noise_cancellation=noise_cancellation.BVC()
+        ),
+    )
+    
+    await session.generate_reply(
+        instructions="Greet the user and offer your assistance."
     )
 
 def run_agent():
